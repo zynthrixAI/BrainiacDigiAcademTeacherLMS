@@ -1,26 +1,78 @@
 @import "tailwindcss";
 
+/*
+ * BDA design system tokens — sourced from the design handoff
+ * (project/Admin Portal.html :root). Shared across all portals.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #f5f5f4;
+  --bg-elev: #ffffff;
+  --ink: #1c1b1b;
+  --ink-2: #2a2926;
+  --muted: #6b7280;
+  --muted-2: #9ca3af;
+  --line: #ecebe7;
+  --line-2: #e5e7eb;
+  --yellow: #f9c323;
+  --yellow-soft: #fef6dd;
+  --yellow-ink: #4f4633;
+  --sidebar-bg: #0f0e0e;
+  --sidebar-ink: #f5f5f4;
+  --sidebar-muted: #8c8a86;
+  --red: #e23b3b;
+  --green: #1f8a5b;
+  --blue: #2a6fdb;
+  --purple: #7e57c2;
+  --orange: #ea580c;
+  --radius: 14px;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg: var(--bg);
+  --color-bg-elev: var(--bg-elev);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-muted-2: var(--muted-2);
+  --color-line: var(--line);
+  --color-line-2: var(--line-2);
+  --color-yellow: var(--yellow);
+  --color-yellow-soft: var(--yellow-soft);
+  --color-yellow-ink: var(--yellow-ink);
+  --color-sidebar-bg: var(--sidebar-bg);
+  --color-sidebar-ink: var(--sidebar-ink);
+  --color-sidebar-muted: var(--sidebar-muted);
+  --color-red: var(--red);
+  --color-green: var(--green);
+  --color-blue: var(--blue);
+  --color-purple: var(--purple);
+  --color-orange: var(--orange);
+
+  --font-display: var(--font-plus-jakarta), "Plus Jakarta Sans", sans-serif;
+  --font-body: var(--font-inter), "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+html,
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  /* Hide the scrollbar app-wide while keeping the content scrollable. */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+}
+
+/* Reusable: scrollable container with no visible scrollbar. */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
