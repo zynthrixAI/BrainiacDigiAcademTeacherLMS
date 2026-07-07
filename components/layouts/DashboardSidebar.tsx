@@ -7,33 +7,43 @@ import { LayersIcon } from "@/components/icons/LayersIcon";
 import { CalendarIcon } from "@/components/icons/CalendarIcon";
 import { PlayIcon } from "@/components/icons/PlayIcon";
 import { ClipboardIcon } from "@/components/icons/ClipboardIcon";
+import { QuestionIcon } from "@/components/icons/QuestionIcon";
 import { WalletIcon } from "@/components/icons/WalletIcon";
 import { LogoutIcon } from "@/components/icons/LogoutIcon";
 import { useTeacherLogout } from "@/hooks/mutations/useTeacherLogout";
 import { useTeacherProfile } from "@/hooks/query/useTeacherProfile";
+import { useQuestions } from "@/hooks/query/useQuestions";
 import { getInitials, getTeacherRole } from "@/lib/utils/teacher";
 import { ROUTES } from "@/lib/constants";
 import type { NavSection } from "@/types/navigation";
 
-const NAV_SECTIONS: NavSection[] = [
-  {
-    section: "Overview",
-    items: [{ label: "Dashboard", href: ROUTES.dashboard, icon: GridIcon }],
-  },
-  {
-    section: "Teaching",
-    items: [
-      { label: "My batches", href: ROUTES.batches, icon: LayersIcon },
-      { label: "Live classes", href: ROUTES.liveClasses, icon: CalendarIcon },
-      { label: "Recordings", href: ROUTES.recordings, icon: PlayIcon },
-      { label: "Assignments", href: ROUTES.assignments, icon: ClipboardIcon },
-    ],
-  },
-  {
-    section: "Account",
-    items: [{ label: "Earnings", href: ROUTES.earnings, icon: WalletIcon }],
-  },
-];
+function useNavSections(pendingQuestions?: number): NavSection[] {
+  return [
+    {
+      section: "Overview",
+      items: [{ label: "Dashboard", href: ROUTES.dashboard, icon: GridIcon }],
+    },
+    {
+      section: "Teaching",
+      items: [
+        { label: "My batches", href: ROUTES.batches, icon: LayersIcon },
+        { label: "Live classes", href: ROUTES.liveClasses, icon: CalendarIcon },
+        { label: "Recordings", href: ROUTES.recordings, icon: PlayIcon },
+        { label: "Assignments", href: ROUTES.assignments, icon: ClipboardIcon },
+        {
+          label: "Questions",
+          href: ROUTES.questions,
+          icon: QuestionIcon,
+          badge: pendingQuestions,
+        },
+      ],
+    },
+    {
+      section: "Account",
+      items: [{ label: "Earnings", href: ROUTES.earnings, icon: WalletIcon }],
+    },
+  ];
+}
 
 interface DashboardSidebarProps {
   mobileOpen: boolean;
@@ -45,6 +55,8 @@ export function DashboardSidebar({ mobileOpen, onClose }: DashboardSidebarProps)
   const router = useRouter();
   const logout = useTeacherLogout();
   const { data: profile, isLoading } = useTeacherProfile();
+  const { data: pendingQuestions } = useQuestions("pending");
+  const navSections = useNavSections(pendingQuestions?.total);
 
   const displayName = profile?.name ?? (isLoading ? "Loading…" : "Teacher");
   const initials = profile ? getInitials(profile.name) : "··";
@@ -80,7 +92,7 @@ export function DashboardSidebar({ mobileOpen, onClose }: DashboardSidebarProps)
       </div>
 
       <nav className="flex flex-col gap-0.5">
-        {NAV_SECTIONS.map((group) => (
+        {navSections.map((group) => (
           <div key={group.section} className="flex flex-col gap-0.5">
             <span className="px-3 pb-1 pt-3 text-[9.5px] font-extrabold uppercase tracking-[0.09em] text-[#5b5955]">
               {group.section}
@@ -101,7 +113,18 @@ export function DashboardSidebar({ mobileOpen, onClose }: DashboardSidebarProps)
                   }`}
                 >
                   <Icon size={16} />
-                  <span>{item.label}</span>
+                  <span className="flex-1">{item.label}</span>
+                  {item.badge ? (
+                    <span
+                      className={`inline-flex min-w-[18px] items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-extrabold leading-none ${
+                        active
+                          ? "bg-ink text-yellow"
+                          : "bg-yellow text-ink"
+                      }`}
+                    >
+                      {item.badge}
+                    </span>
+                  ) : null}
                 </Link>
               );
             })}

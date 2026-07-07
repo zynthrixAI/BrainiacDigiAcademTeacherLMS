@@ -30,6 +30,7 @@ export const ROUTES = {
   liveClasses: "/live-classes",
   recordings: "/recordings",
   assignments: "/assignments",
+  questions: "/questions",
   earnings: "/earnings",
 } as const;
 

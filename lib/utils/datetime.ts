@@ -9,6 +9,14 @@ export function formatDateTime(iso: string): string {
   });
 }
 
+/** Format a duration in seconds as `mm:ss`, e.g. 125 -> "2:05". */
+export function formatVideoTimestamp(seconds: number): string {
+  const total = Math.max(0, Math.round(seconds));
+  const minutes = Math.floor(total / 60);
+  const secs = total % 60;
+  return `${minutes}:${String(secs).padStart(2, "0")}`;
+}
+
 /** Convert an ISO datetime to a value usable by `<input type="datetime-local">`. */
 export function toDateTimeLocalValue(iso: string): string {
   const date = new Date(iso);

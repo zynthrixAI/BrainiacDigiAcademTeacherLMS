@@ -1,4 +1,5 @@
 import type { LiveClassListParams } from "@/types/liveClass";
+import type { QuestionStatus } from "@/types/question";
 
 export const QUERY_KEYS = {
   auth: {
@@ -32,5 +33,11 @@ export const QUERY_KEYS = {
       ["liveClasses", "detail", liveClassId] as const,
     attendance: (liveClassId: string) =>
       ["liveClasses", "attendance", liveClassId] as const,
+  },
+  questions: {
+    /** Prefix matching every questions query (used for broad invalidation). */
+    root: ["questions"] as const,
+    list: (status?: QuestionStatus | "all") =>
+      ["questions", "list", status ?? "all"] as const,
   },
 } as const;

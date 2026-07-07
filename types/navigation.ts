@@ -5,6 +5,8 @@ export interface NavItem {
   label: string;
   href: string;
   icon: ComponentType<IconProps>;
+  /** Optional count badge (e.g. pending items) shown beside the label. */
+  badge?: number;
 }
 
 export interface NavSection {
