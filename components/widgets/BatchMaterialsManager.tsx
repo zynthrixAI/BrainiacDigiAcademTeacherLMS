@@ -13,7 +13,8 @@ interface BatchMaterialsManagerProps {
 }
 
 export function BatchMaterialsManager({ batchId }: BatchMaterialsManagerProps) {
-  const { data: materials, isLoading } = useBatchMaterials(batchId);
+  const { data: materials, isLoading, isError, error } =
+    useBatchMaterials(batchId);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const addMutation = useAddBatchMaterial(batchId);
@@ -36,6 +37,7 @@ export function BatchMaterialsManager({ batchId }: BatchMaterialsManagerProps) {
       <ResourceManager
         resources={materials ?? []}
         isLoading={isLoading}
+        listErrorMessage={isError ? extractApiError(error) : undefined}
         addPending={addMutation.isPending}
         addErrorMessage={
           addMutation.isError ? extractApiError(addMutation.error) : undefined

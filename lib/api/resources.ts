@@ -4,6 +4,21 @@ import type { ResourceItem } from "@/types/resource";
 
 const BASE = TEACHER_API_PREFIX;
 
+interface BatchMaterialsResponse {
+  materials: ResourceItem[];
+}
+
+export async function listBatchMaterials(
+  accessToken: string,
+  batchId: string,
+): Promise<ResourceItem[]> {
+  const { data } = await axiosInstance.get<BatchMaterialsResponse>(
+    `${BASE}/batches/${batchId}/materials`,
+    authHeader(accessToken),
+  );
+  return data.materials;
+}
+
 export async function addRecordingResource(
   accessToken: string,
   recordingId: string,
