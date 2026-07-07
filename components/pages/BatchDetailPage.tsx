@@ -6,15 +6,17 @@ import { useBatches } from "@/hooks/query/useBatches";
 import { LiveClassManager } from "@/components/widgets/LiveClassManager";
 import { RecordingManager } from "@/components/widgets/RecordingManager";
 import { AssignmentManager } from "@/components/widgets/AssignmentManager";
+import { BatchMaterialsManager } from "@/components/widgets/BatchMaterialsManager";
 import { SegmentedTabs } from "@/components/ui/SegmentedTabs";
 import { ROUTES } from "@/lib/constants";
 
-type BatchTab = "live" | "recordings" | "assignments";
+type BatchTab = "live" | "recordings" | "assignments" | "materials";
 
 const TABS: { value: BatchTab; label: string }[] = [
   { value: "live", label: "Live classes" },
   { value: "recordings", label: "Recordings" },
   { value: "assignments", label: "Assignments" },
+  { value: "materials", label: "Materials" },
 ];
 
 interface BatchDetailPageProps {
@@ -54,6 +56,7 @@ export function BatchDetailPage({ batchId }: BatchDetailPageProps) {
       {tab === "live" ? <LiveClassManager batchId={batchId} /> : null}
       {tab === "recordings" ? <RecordingManager batchId={batchId} /> : null}
       {tab === "assignments" ? <AssignmentManager batchId={batchId} /> : null}
+      {tab === "materials" ? <BatchMaterialsManager batchId={batchId} /> : null}
     </div>
   );
 }

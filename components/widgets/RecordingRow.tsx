@@ -1,5 +1,12 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/Button";
+import { Modal } from "@/components/ui/Modal";
+import { ResourceManager } from "@/components/widgets/ResourceManager";
+import { useAddRecordingResource } from "@/hooks/mutations/useAddRecordingResource";
+import { useDeleteRecordingResource } from "@/hooks/mutations/useDeleteRecordingResource";
+import { extractApiError } from "@/lib/utils/apiError";
 import type { Recording, RecordingStatus } from "@/types/recording";
+import type { ResourceItem } from "@/types/resource";
 
 const STATUS_STYLES: Record<RecordingStatus, { label: string; className: string }> = {
   processing: { label: "Processing", className: "bg-[#eef2ff] text-blue" },
@@ -26,6 +33,29 @@ export function RecordingRow({
   onDelete,
 }: RecordingRowProps) {
   const status = STATUS_STYLES[recording.status];
+
+  const [resourcesOpen, setResourcesOpen] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const addResourceMutation = useAddRecordingResource(recording.id);
+  const deleteResourceMutation = useDeleteRecordingResource();
+
+  const resources = recording.resources ?? [];
+
+  const handleAddResource = async (formData: FormData) => {
+    await addResourceMutation.mutateAsync(formData);
+  };
+
+  const handleDeleteResource = (resource: ResourceItem) => {
+    if (!window.confirm(`Delete "${resource.title}"? This cannot be undone.`)) {
+      return;
+    }
+    setDeletingId(resource.id);
+    deleteResourceMutation.mutate(
+      { recordingId: recording.id, resourceId: resource.id },
+      { onSettled: () => setDeletingId(null) },
+    );
+  };
 
   return (
     <div className="flex flex-col gap-3 border-b border-line px-1 py-4 last:border-b-0 sm:flex-row sm:items-center sm:justify-between">
@@ -77,6 +107,13 @@ export function RecordingRow({
         </Button>
         <Button
           variant="ghost"
+          className={ACTION}
+          onClick={() => setResourcesOpen(true)}
+        >
+          Resources ({resources.length})
+        </Button>
+        <Button
+          variant="ghost"
           className={`${ACTION} text-red`}
           disabled={pending}
           onClick={() => onDelete(recording)}
@@ -84,6 +121,27 @@ export function RecordingRow({
           Delete
         </Button>
       </div>
+
+      <Modal
+        open={resourcesOpen}
+        onClose={() => setResourcesOpen(false)}
+        title={`Resources — ${recording.title}`}
+        widthClassName="max-w-xl"
+      >
+        <ResourceManager
+          resources={resources}
+          addPending={addResourceMutation.isPending}
+          addErrorMessage={
+            addResourceMutation.isError
+              ? extractApiError(addResourceMutation.error)
+              : undefined
+          }
+          deletingId={deletingId}
+          onAdd={handleAddResource}
+          onDelete={handleDeleteResource}
+          emptyLabel="No resources on this recording yet."
+        />
+      </Modal>
     </div>
   );
 }

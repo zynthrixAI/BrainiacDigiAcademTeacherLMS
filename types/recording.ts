@@ -1,3 +1,5 @@
+import type { ResourceItem } from "@/types/resource";
+
 export type RecordingStatus =
   | "processing"
   | "draft"
@@ -19,6 +21,7 @@ export interface Recording {
   status: RecordingStatus;
   admin_notes: string | null;
   raised_for_edit: boolean;
+  resources: ResourceItem[];
   created_at: string;
   updated_at: string;
 }

@@ -7,6 +7,7 @@ export const QUERY_KEYS = {
   },
   batches: {
     all: ["batches"] as const,
+    materials: (batchId: string) => ["batches", "materials", batchId] as const,
   },
   recordings: {
     root: ["recordings"] as const,
