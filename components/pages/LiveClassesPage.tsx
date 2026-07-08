@@ -39,7 +39,6 @@ type StatusFilter = "all" | LiveClassStatus;
 const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
   { value: "all", label: "All" },
   { value: "scheduled", label: "Scheduled" },
-  { value: "live", label: "Live" },
   { value: "ended", label: "Ended" },
   { value: "cancelled", label: "Cancelled" },
   { value: "past_due", label: "Past due" },

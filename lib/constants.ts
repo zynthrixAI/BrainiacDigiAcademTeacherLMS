@@ -38,6 +38,6 @@ export const AUTH_BRAND = {
   headlineLead: "Teach brilliantly.",
   headlineAccent: "One workspace.",
   description:
-    "Schedule live classes, publish recordings, grade assignments, and track your payouts — all from a single educator workspace.",
+    "Schedule live classes, publish recordings, grade assignments, and answer student questions — all from a single educator workspace.",
   copyright: "© 2026 Brainiacs · Karachi, PK",
 } as const;

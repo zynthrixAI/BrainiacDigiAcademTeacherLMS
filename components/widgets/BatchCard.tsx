@@ -43,11 +43,6 @@ export function BatchCard({ batch }: BatchCardProps) {
             <span className="font-bold text-ink">{batch.enrolled_count}</span>{" "}
             enrolled
           </span>
-          <span>
-            <span className="font-bold text-ink">
-              Rs. {batch.price.toLocaleString()}
-            </span>
-          </span>
         </div>
         <span className="flex items-center gap-1 text-xs font-bold text-yellow-ink">
           Classes <ArrowRightIcon size={13} className="transition-transform group-hover:translate-x-0.5" />

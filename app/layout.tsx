@@ -18,7 +18,7 @@ const bodyFont = Inter({
 
 export const metadata: Metadata = {
   title: APP_NAME,
-  description: "Teach, schedule live classes, publish recordings, and track payouts.",
+  description: "Teach, schedule live classes, publish recordings, and grade assignments.",
 };
 
 export default function RootLayout({
