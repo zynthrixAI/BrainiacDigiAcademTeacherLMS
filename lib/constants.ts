@@ -24,25 +24,12 @@ export const AUTH_COOKIE_MAX_AGE = {
 export const ROUTES = {
   login: "/login",
   forgotPassword: "/forgot-password",
-  dashboard: "/dashboard",
   batches: "/batches",
-  subjects: "/subjects",
   liveClasses: "/live-classes",
   recordings: "/recordings",
   assignments: "/assignments",
   questions: "/questions",
-  earnings: "/earnings",
 } as const;
-
-export const EXTERNAL_PORTALS = {
-  admin: "/admin",
-  student: "/student",
-} as const;
-
-export interface AuthStat {
-  value: string;
-  label: string;
-}
 
 export const AUTH_BRAND = {
   initial: "B",
@@ -55,9 +42,3 @@ export const AUTH_BRAND = {
     "Schedule live classes, publish recordings, grade assignments, and track your payouts — all from a single educator workspace.",
   copyright: "© 2026 BDA · Karachi, PK",
 } as const;
-
-export const AUTH_STATS: AuthStat[] = [
-  { value: "Rs. 360k", label: "Lifetime earnings" },
-  { value: "248", label: "Active students" },
-  { value: "6", label: "Subjects" },
-];

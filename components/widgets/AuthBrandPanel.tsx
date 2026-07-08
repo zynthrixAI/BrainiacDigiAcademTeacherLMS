@@ -1,16 +1,11 @@
 import { LockIcon } from "@/components/icons/LockIcon";
-import { AUTH_BRAND, AUTH_STATS } from "@/lib/constants";
-import type { AuthStat } from "@/lib/constants";
+import { AUTH_BRAND } from "@/lib/constants";
 
 interface AuthBrandPanelProps {
   className?: string;
-  stats?: AuthStat[];
 }
 
-export function AuthBrandPanel({
-  className = "",
-  stats = AUTH_STATS,
-}: AuthBrandPanelProps) {
+export function AuthBrandPanel({ className = "" }: AuthBrandPanelProps) {
   return (
     <aside
       className={`relative flex flex-col overflow-hidden p-12 text-white ${className}`}
@@ -60,17 +55,6 @@ export function AuthBrandPanel({
           <p className="m-0 max-w-[460px] text-[14.5px] leading-[1.65] text-white/65">
             {AUTH_BRAND.description}
           </p>
-
-          <div className="mt-9 grid grid-cols-3 gap-9">
-            {stats.map((stat) => (
-              <div key={stat.label}>
-                <div className="font-display text-[22px] font-extrabold text-yellow">
-                  {stat.value}
-                </div>
-                <div className="text-xs text-white/55">{stat.label}</div>
-              </div>
-            ))}
-          </div>
         </div>
 
         <span className="mt-7 text-xs text-white/45">{AUTH_BRAND.copyright}</span>

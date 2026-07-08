@@ -2,13 +2,11 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { GridIcon } from "@/components/icons/GridIcon";
 import { LayersIcon } from "@/components/icons/LayersIcon";
 import { CalendarIcon } from "@/components/icons/CalendarIcon";
 import { PlayIcon } from "@/components/icons/PlayIcon";
 import { ClipboardIcon } from "@/components/icons/ClipboardIcon";
 import { QuestionIcon } from "@/components/icons/QuestionIcon";
-import { WalletIcon } from "@/components/icons/WalletIcon";
 import { LogoutIcon } from "@/components/icons/LogoutIcon";
 import { useTeacherLogout } from "@/hooks/mutations/useTeacherLogout";
 import { useTeacherProfile } from "@/hooks/query/useTeacherProfile";
@@ -19,10 +17,6 @@ import type { NavSection } from "@/types/navigation";
 
 function useNavSections(pendingQuestions?: number): NavSection[] {
   return [
-    {
-      section: "Overview",
-      items: [{ label: "Dashboard", href: ROUTES.dashboard, icon: GridIcon }],
-    },
     {
       section: "Teaching",
       items: [
@@ -37,10 +31,6 @@ function useNavSections(pendingQuestions?: number): NavSection[] {
           badge: pendingQuestions,
         },
       ],
-    },
-    {
-      section: "Account",
-      items: [{ label: "Earnings", href: ROUTES.earnings, icon: WalletIcon }],
     },
   ];
 }

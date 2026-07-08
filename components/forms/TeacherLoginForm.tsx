@@ -38,7 +38,7 @@ export function TeacherLoginForm() {
       onSubmit={async (values) => {
         try {
           await mutateAsync(values);
-          router.push(ROUTES.dashboard);
+          router.push(ROUTES.batches);
         } catch {
           // Surfaced to the user via the `isError` banner below.
         }

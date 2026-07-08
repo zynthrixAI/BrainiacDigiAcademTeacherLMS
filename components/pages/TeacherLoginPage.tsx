@@ -1,5 +1,4 @@
 import { TeacherLoginForm } from "@/components/forms/TeacherLoginForm";
-import { EXTERNAL_PORTALS } from "@/lib/constants";
 
 export function TeacherLoginPage() {
   return (
@@ -12,22 +11,6 @@ export function TeacherLoginPage() {
       </p>
 
       <TeacherLoginForm />
-
-      <div className="mt-6 flex items-center justify-center gap-2">
-        <a
-          href={EXTERNAL_PORTALS.admin}
-          className="text-xs font-semibold text-muted hover:text-ink"
-        >
-          Admin portal
-        </a>
-        <span className="text-xs text-muted">·</span>
-        <a
-          href={EXTERNAL_PORTALS.student}
-          className="text-xs font-semibold text-muted hover:text-ink"
-        >
-          Student portal
-        </a>
-      </div>
     </div>
   );
 }
