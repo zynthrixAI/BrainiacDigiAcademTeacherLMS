@@ -18,7 +18,7 @@ const STEP_COPY = [
   {
     title: "Forgot your password?",
     subtitle:
-      "Enter the email on your BDA teacher account and we'll send a 6-digit reset code.",
+      "Enter the email on your Brainiacs teacher account and we'll send a 6-digit reset code.",
   },
   {
     title: "Enter your reset code",

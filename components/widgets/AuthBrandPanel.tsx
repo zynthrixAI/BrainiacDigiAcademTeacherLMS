@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { LockIcon } from "@/components/icons/LockIcon";
 import { AUTH_BRAND } from "@/lib/constants";
 
@@ -23,13 +24,19 @@ export function AuthBrandPanel({ className = "" }: AuthBrandPanelProps) {
       <div className="relative z-10 flex h-full max-w-[520px] flex-col justify-between">
         <div className="flex items-center gap-3">
           <div
-            className="inline-flex h-11 w-11 items-center justify-center rounded-xl font-display text-xl font-extrabold text-ink"
+            className="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-white p-2"
             style={{
-              background: "var(--yellow)",
               boxShadow: "0 6px 18px rgba(249,195,35,0.4)",
             }}
           >
-            {AUTH_BRAND.initial}
+            <Image
+              src="/brand/brainiacs-mark.png"
+              alt="Brainiacs"
+              width={44}
+              height={44}
+              className="h-full w-full object-contain"
+              priority
+            />
           </div>
           <div className="flex flex-col leading-none">
             <span className="font-display text-xl font-extrabold">

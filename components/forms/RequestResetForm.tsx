@@ -45,7 +45,7 @@ export function RequestResetForm({
           name="email"
           label="Email"
           type="email"
-          placeholder="you@bda.edu.pk"
+          placeholder="you@brainiacs.edu.pk"
           autoComplete="email"
           icon={<MailIcon size={16} />}
         />

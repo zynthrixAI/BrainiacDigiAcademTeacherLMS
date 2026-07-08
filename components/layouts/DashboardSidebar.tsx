@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { LayersIcon } from "@/components/icons/LayersIcon";
 import { CalendarIcon } from "@/components/icons/CalendarIcon";
@@ -50,7 +51,7 @@ export function DashboardSidebar({ mobileOpen, onClose }: DashboardSidebarProps)
 
   const displayName = profile?.name ?? (isLoading ? "Loading…" : "Teacher");
   const initials = profile ? getInitials(profile.name) : "··";
-  const role = profile ? getTeacherRole(profile.level) : "BDA Teacher";
+  const role = profile ? getTeacherRole(profile.level) : "Brainiacs Teacher";
 
   const handleSignOut = () => {
     logout.mutate(undefined, {
@@ -68,15 +69,22 @@ export function DashboardSidebar({ mobileOpen, onClose }: DashboardSidebarProps)
       }`}
     >
       <div className="flex items-center gap-3 px-2 pb-3.5 pt-1">
-        <span className="flex h-[38px] w-[38px] items-center justify-center rounded-[10px] bg-yellow font-display text-base font-extrabold text-ink shadow-[0_4px_14px_rgba(249,195,35,0.35)]">
-          B
+        <span className="flex h-[38px] w-[38px] flex-shrink-0 items-center justify-center rounded-[10px] bg-white p-1.5 shadow-[0_4px_14px_rgba(249,195,35,0.35)]">
+          <Image
+            src="/brand/brainiacs-mark.png"
+            alt="Brainiacs"
+            width={38}
+            height={38}
+            className="h-full w-full object-contain"
+            priority
+          />
         </span>
         <div className="flex flex-col leading-none">
           <span className="font-display text-sm font-extrabold tracking-[0.02em] text-white">
-            BDA Teacher
+            Brainiacs
           </span>
           <span className="mt-1 text-[9.5px] uppercase tracking-[0.1em] text-sidebar-muted">
-            Brainiacs Digital
+            Teacher Portal
           </span>
         </div>
       </div>

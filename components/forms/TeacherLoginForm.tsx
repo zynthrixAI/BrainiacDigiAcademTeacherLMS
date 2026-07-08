@@ -49,7 +49,7 @@ export function TeacherLoginForm() {
           name="email"
           label="Email"
           type="email"
-          placeholder="you@bda.edu.pk"
+          placeholder="you@brainiacs.edu.pk"
           autoComplete="email"
           icon={<UserIcon size={16} />}
         />

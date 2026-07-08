@@ -103,7 +103,11 @@ export function LiveClassManager({ batchId }: LiveClassManagerProps) {
   };
 
   const handleDelete = (liveClass: LiveClass) => {
-    if (!window.confirm(`Delete "${liveClass.title}"? This cannot be undone.`)) {
+    const message =
+      liveClass.status === "ended" || liveClass.status === "past_due"
+        ? `Delete "${liveClass.title}"? This class has already happened and this cannot be undone.`
+        : `Delete "${liveClass.title}"? This cannot be undone.`;
+    if (!window.confirm(message)) {
       return;
     }
     setBusyId(liveClass.id);
@@ -198,6 +202,11 @@ export function LiveClassManager({ batchId }: LiveClassManagerProps) {
           </p>
         ) : (
           <div className="flex flex-col">
+            {deleteMutation.isError ? (
+              <div className="pb-3">
+                <FormError message={extractApiError(deleteMutation.error)} />
+              </div>
+            ) : null}
             {items.map((liveClass) => (
               <LiveClassRow
                 key={liveClass.id}

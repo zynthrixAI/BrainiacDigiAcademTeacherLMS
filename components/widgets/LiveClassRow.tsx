@@ -119,6 +119,14 @@ export function LiveClassRow({
               variant="ghost"
               className={ACTION}
               disabled={pending}
+              onClick={() => onCancel(liveClass)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="ghost"
+              className={ACTION}
+              disabled={pending}
               onClick={() => onViewAttendance(liveClass)}
             >
               Attendance
@@ -127,12 +135,34 @@ export function LiveClassRow({
         ) : null}
 
         {liveClass.status === "ended" ? (
+          <>
+            <Button
+              variant="ghost"
+              className={ACTION}
+              disabled={pending}
+              onClick={() => onViewAttendance(liveClass)}
+            >
+              Attendance
+            </Button>
+            <Button
+              variant="ghost"
+              className={`${ACTION} text-red`}
+              disabled={pending}
+              onClick={() => onDelete(liveClass)}
+            >
+              Delete
+            </Button>
+          </>
+        ) : null}
+
+        {liveClass.status === "cancelled" || liveClass.status === "past_due" ? (
           <Button
             variant="ghost"
-            className={ACTION}
-            onClick={() => onViewAttendance(liveClass)}
+            className={`${ACTION} text-red`}
+            disabled={pending}
+            onClick={() => onDelete(liveClass)}
           >
-            Attendance
+            Delete
           </Button>
         ) : null}
       </div>

@@ -7,7 +7,7 @@ export function TeacherLoginPage() {
         Teacher sign in
       </h2>
       <p className="m-0 mt-2 text-sm leading-[1.55] text-muted">
-        Use your BDA teacher credentials. Admins and students log in elsewhere.
+        Use your Brainiacs teacher credentials. Admins and students log in elsewhere.
       </p>
 
       <TeacherLoginForm />

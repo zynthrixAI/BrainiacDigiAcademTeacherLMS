@@ -1,4 +1,4 @@
-export const APP_NAME = "BDA Teacher Portal";
+export const APP_NAME = "Brainiacs Teacher Portal";
 
 /** Backend host. Set `NEXT_PUBLIC_API_URL` in `.env.local`. */
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -32,13 +32,12 @@ export const ROUTES = {
 } as const;
 
 export const AUTH_BRAND = {
-  initial: "B",
-  name: "BDA Teaching",
+  name: "Brainiacs Teaching",
   subtitle: "Educator console",
   badge: "Teacher access",
   headlineLead: "Teach brilliantly.",
   headlineAccent: "One workspace.",
   description:
     "Schedule live classes, publish recordings, grade assignments, and track your payouts — all from a single educator workspace.",
-  copyright: "© 2026 BDA · Karachi, PK",
+  copyright: "© 2026 Brainiacs · Karachi, PK",
 } as const;
