@@ -31,6 +31,20 @@ function buildInitialScores(
   return scores;
 }
 
+/**
+ * Validate a single criterion's raw marks input against its max_marks.
+ * Returns an error message when invalid/out-of-range, or `undefined` when the
+ * field is empty (not yet graded) or valid.
+ */
+function getMarksError(raw: string, maxMarks: number): string | undefined {
+  if (raw.trim() === "") return undefined;
+  const value = Number(raw);
+  if (!Number.isFinite(value)) return "Enter a valid number";
+  if (value < 0) return "Cannot be negative";
+  if (value > maxMarks) return `Cannot exceed ${maxMarks}`;
+  return undefined;
+}
+
 export function GradeForm({
   rubric,
   grade,
@@ -49,6 +63,21 @@ export function GradeForm({
     0,
   );
 
+  const marksErrors = rubric.reduce<Record<string, string | undefined>>(
+    (acc, c) => {
+      acc[c.criterion] = getMarksError(
+        scores[c.criterion]?.marks_awarded ?? "",
+        c.max_marks,
+      );
+      return acc;
+    },
+    {},
+  );
+  const hasIncompleteOrInvalid = rubric.some((c) => {
+    const raw = scores[c.criterion]?.marks_awarded ?? "";
+    return raw.trim() === "" || marksErrors[c.criterion] !== undefined;
+  });
+
   const updateScore = (criterion: string, patch: Partial<GradeFormScore>) => {
     setScores((current) => ({
       ...current,
@@ -57,6 +86,7 @@ export function GradeForm({
   };
 
   const handleSave = () => {
+    if (hasIncompleteOrInvalid) return;
     onSave({
       rubric_scores: rubric.map((c) => ({
         criterion: c.criterion,
@@ -79,44 +109,64 @@ export function GradeForm({
       </div>
 
       <ul className="flex flex-col gap-3">
-        {rubric.map((criterion) => (
-          <li
-            key={criterion.criterion}
-            className="flex flex-col gap-2 rounded-xl border border-line bg-white p-3"
-          >
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-sm font-bold text-ink">
-                {criterion.criterion}
-              </span>
-              <div className="flex shrink-0 items-center gap-1 rounded-lg bg-[#faf9f7] px-2 py-1.5">
-                <input
-                  value={scores[criterion.criterion]?.marks_awarded ?? ""}
-                  onChange={(event) =>
-                    updateScore(criterion.criterion, {
-                      marks_awarded: event.target.value.replace(/[^0-9]/g, ""),
-                    })
-                  }
-                  inputMode="numeric"
-                  placeholder="0"
-                  aria-label={`Marks for ${criterion.criterion}`}
-                  className="w-9 border-0 bg-transparent text-right text-sm font-semibold text-ink outline-none"
-                />
-                <span className="text-[11px] text-muted">
-                  / {criterion.max_marks}
+        {rubric.map((criterion) => {
+          const marksError = marksErrors[criterion.criterion];
+          const errorId = `marks-error-${criterion.criterion}`;
+          return (
+            <li
+              key={criterion.criterion}
+              className="flex flex-col gap-2 rounded-xl border border-line bg-white p-3"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-sm font-bold text-ink">
+                  {criterion.criterion}
                 </span>
+                <div
+                  className={`flex shrink-0 items-center gap-1 rounded-lg bg-[#faf9f7] px-2 py-1.5 ${
+                    marksError ? "outline outline-1 outline-red" : ""
+                  }`}
+                >
+                  <input
+                    value={scores[criterion.criterion]?.marks_awarded ?? ""}
+                    onChange={(event) =>
+                      updateScore(criterion.criterion, {
+                        marks_awarded: event.target.value.replace(
+                          /[^0-9]/g,
+                          "",
+                        ),
+                      })
+                    }
+                    inputMode="numeric"
+                    placeholder="0"
+                    aria-label={`Marks for ${criterion.criterion}`}
+                    aria-invalid={Boolean(marksError)}
+                    aria-describedby={marksError ? errorId : undefined}
+                    className="w-9 border-0 bg-transparent text-right text-sm font-semibold text-ink outline-none"
+                  />
+                  <span className="text-[11px] text-muted">
+                    / {criterion.max_marks}
+                  </span>
+                </div>
               </div>
-            </div>
-            <input
-              value={scores[criterion.criterion]?.feedback ?? ""}
-              onChange={(event) =>
-                updateScore(criterion.criterion, { feedback: event.target.value })
-              }
-              placeholder="Feedback (optional)"
-              aria-label={`Feedback for ${criterion.criterion}`}
-              className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink outline-none placeholder:text-muted-2 focus:border-yellow"
-            />
-          </li>
-        ))}
+              {marksError ? (
+                <span id={errorId} role="alert" className="text-xs text-red">
+                  {marksError}
+                </span>
+              ) : null}
+              <input
+                value={scores[criterion.criterion]?.feedback ?? ""}
+                onChange={(event) =>
+                  updateScore(criterion.criterion, {
+                    feedback: event.target.value,
+                  })
+                }
+                placeholder="Feedback (optional)"
+                aria-label={`Feedback for ${criterion.criterion}`}
+                className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink outline-none placeholder:text-muted-2 focus:border-yellow"
+              />
+            </li>
+          );
+        })}
       </ul>
 
       <div className="flex flex-col gap-2">
@@ -142,6 +192,7 @@ export function GradeForm({
         type="button"
         variant="ghost"
         isLoading={saving}
+        disabled={hasIncompleteOrInvalid}
         onClick={handleSave}
         className="w-full"
       >

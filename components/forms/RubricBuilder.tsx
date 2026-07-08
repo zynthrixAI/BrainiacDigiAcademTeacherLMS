@@ -17,6 +17,7 @@ export function RubricBuilder({ rows, onChange }: RubricBuilderProps) {
   };
 
   const removeRow = (index: number) => {
+    if (rows.length <= 1) return;
     onChange(rows.filter((_, i) => i !== index));
   };
 
@@ -77,8 +78,18 @@ export function RubricBuilder({ rows, onChange }: RubricBuilderProps) {
               <button
                 type="button"
                 onClick={() => removeRow(index)}
-                aria-label={`Remove criterion ${index + 1}`}
-                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted transition-colors hover:bg-[#fef2f2] hover:text-red"
+                disabled={rows.length <= 1}
+                aria-label={
+                  rows.length <= 1
+                    ? "At least one criterion is required"
+                    : `Remove criterion ${index + 1}`
+                }
+                title={
+                  rows.length <= 1
+                    ? "At least one criterion is required"
+                    : undefined
+                }
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted transition-colors hover:bg-[#fef2f2] hover:text-red disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-muted"
               >
                 <CloseIcon size={14} />
               </button>

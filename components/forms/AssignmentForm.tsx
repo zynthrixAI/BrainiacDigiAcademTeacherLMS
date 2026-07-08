@@ -18,6 +18,38 @@ const validationSchema = Yup.object({
   deadline: Yup.string().required("Pick a deadline"),
 });
 
+/** Requires at least one rubric criterion, each with a name and max_marks >= 1. */
+const rubricSchema = Yup.array()
+  .of(
+    Yup.object({
+      criterion: Yup.string().trim().required("Criterion name is required"),
+      max_marks: Yup.number()
+        .typeError("Enter a valid number")
+        .min(1, "Max marks must be at least 1")
+        .required("Max marks is required"),
+    }),
+  )
+  .min(1, "Add at least one rubric criterion with a name and marks.");
+
+/** Runs the rubric rows (after dropping blank-named ones) through `rubricSchema`. */
+function getRubricError(rows: RubricFormRow[]): string | undefined {
+  const cleaned = rows
+    .filter((row) => row.criterion.trim() !== "")
+    .map((row) => ({
+      criterion: row.criterion.trim(),
+      max_marks: Number(row.max_marks),
+    }));
+  try {
+    rubricSchema.validateSync(cleaned, { abortEarly: false });
+    return undefined;
+  } catch (err) {
+    if (err instanceof Yup.ValidationError) {
+      return err.errors[0] ?? "Fix the rubric before saving.";
+    }
+    return "Fix the rubric before saving.";
+  }
+}
+
 const LABEL = "font-display text-[12.5px] font-bold text-ink-2";
 const FIELD =
   "w-full rounded-xl border border-line bg-white px-3.5 py-2.5 text-sm text-ink outline-none focus:border-yellow placeholder:text-muted-2";
@@ -55,11 +87,18 @@ export function AssignmentForm({
   );
   const [file, setFile] = useState<File | null>(null);
 
+  const rubricError = getRubricError(rubric);
+
   return (
     <Formik
       initialValues={initialValues}
       validationSchema={validationSchema}
       onSubmit={async (values) => {
+        // Defense-in-depth: the Save button is already disabled while
+        // `rubricError` is set, but guard here too in case that state is
+        // stale (e.g. a submit triggered before a re-render flushes).
+        if (rubricError) return;
+
         const formData = new FormData();
         formData.append("title", values.title.trim());
         formData.append("instructions", values.instructions.trim());
@@ -147,6 +186,11 @@ export function AssignmentForm({
           </div>
 
           <RubricBuilder rows={rubric} onChange={setRubric} />
+          {rubricError ? (
+            <span role="alert" className="text-xs text-red">
+              {rubricError}
+            </span>
+          ) : null}
 
           <label className="flex items-center gap-2 text-sm text-ink-2">
             <input
@@ -205,7 +249,7 @@ export function AssignmentForm({
           <Button
             type="submit"
             isLoading={pending}
-            disabled={disabled}
+            disabled={disabled || Boolean(rubricError)}
             className="w-full"
           >
             {pending ? "Saving…" : submitLabel}

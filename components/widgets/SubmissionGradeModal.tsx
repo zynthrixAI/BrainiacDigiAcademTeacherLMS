@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { FormError } from "@/components/ui/FormError";
@@ -10,7 +11,7 @@ import { useReleaseGrade } from "@/hooks/mutations/useReleaseGrade";
 import { extractApiError } from "@/lib/utils/apiError";
 import { formatDateTime } from "@/lib/utils/datetime";
 import { getGradeState, type GradeState } from "@/lib/utils/submission";
-import { CDN_BASE } from "@/lib/constants";
+import { CDN_BASE, ROUTES } from "@/lib/constants";
 import type { RubricCriterion } from "@/types/assignment";
 import type { GradeRequest, Submission } from "@/types/submission";
 
@@ -106,17 +107,32 @@ export function SubmissionGradeModal({
           )}
         </div>
 
-        <GradeForm
-          rubric={rubric}
-          grade={current.grade}
-          saving={gradeMutation.isPending}
-          errorMessage={
-            gradeMutation.isError
-              ? extractApiError(gradeMutation.error)
-              : undefined
-          }
-          onSave={handleSave}
-        />
+        {rubric.length === 0 ? (
+          <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-line-2 bg-[#faf9f7] p-6 text-center">
+            <p className="m-0 text-sm text-muted">
+              This assignment has no rubric criteria. Edit the assignment to
+              add them before grading.
+            </p>
+            <Link
+              href={ROUTES.assignments}
+              className="inline-flex items-center justify-center rounded-xl border border-transparent bg-yellow px-4 py-2.5 font-display text-[13px] font-bold text-ink transition-all duration-150 ease-out hover:bg-[#f5b900]"
+            >
+              Edit assignment
+            </Link>
+          </div>
+        ) : (
+          <GradeForm
+            rubric={rubric}
+            grade={current.grade}
+            saving={gradeMutation.isPending}
+            errorMessage={
+              gradeMutation.isError
+                ? extractApiError(gradeMutation.error)
+                : undefined
+            }
+            onSave={handleSave}
+          />
+        )}
 
         <div className="flex flex-col gap-2 border-t border-line pt-4">
           <FormError
@@ -128,13 +144,15 @@ export function SubmissionGradeModal({
           />
           {!current.grade ? (
             <p className="m-0 text-xs text-muted">
-              Save a grade first, then release it to notify the student.
+              {rubric.length === 0
+                ? "Add rubric criteria to this assignment before a grade can be saved."
+                : "Save a grade first, then release it to notify the student."}
             </p>
           ) : null}
           <Button
             onClick={handleRelease}
             isLoading={releaseMutation.isPending}
-            disabled={!current.grade || state === "released"}
+            disabled={!current.grade || state === "released" || rubric.length === 0}
             className="w-full"
           >
             {state === "released" ? "Released" : "Release to student"}
