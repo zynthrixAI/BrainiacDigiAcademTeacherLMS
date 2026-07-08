@@ -7,6 +7,7 @@ import { LiveClassManager } from "@/components/widgets/LiveClassManager";
 import { RecordingManager } from "@/components/widgets/RecordingManager";
 import { AssignmentManager } from "@/components/widgets/AssignmentManager";
 import { BatchMaterialsManager } from "@/components/widgets/BatchMaterialsManager";
+import { BatchCourseModal } from "@/components/widgets/BatchCourseModal";
 import { SegmentedTabs } from "@/components/ui/SegmentedTabs";
 import { ROUTES } from "@/lib/constants";
 
@@ -28,6 +29,7 @@ export function BatchDetailPage({ batchId }: BatchDetailPageProps) {
   const batch = batches?.find((item) => item.id === batchId);
 
   const [tab, setTab] = useState<BatchTab>("live");
+  const [courseModalOpen, setCourseModalOpen] = useState(false);
 
   return (
     <div className="mx-auto w-full max-w-[1100px]">
@@ -47,6 +49,22 @@ export function BatchDetailPage({ batchId }: BatchDetailPageProps) {
             ? `${batch.subject_name} · ${batch.enrolled_count} students`
             : "Batch"}
         </span>
+        {batch ? (
+          <div className="mt-2 flex items-center gap-2">
+            <span className="text-sm text-ink-2">
+              {batch.course_title
+                ? `Course: ${batch.course_title}`
+                : "No course linked"}
+            </span>
+            <button
+              type="button"
+              onClick={() => setCourseModalOpen(true)}
+              className="text-xs font-semibold text-muted underline-offset-2 hover:text-ink hover:underline"
+            >
+              Edit
+            </button>
+          </div>
+        ) : null}
       </div>
 
       <div className="mb-5 overflow-x-auto">
@@ -57,6 +75,13 @@ export function BatchDetailPage({ batchId }: BatchDetailPageProps) {
       {tab === "recordings" ? <RecordingManager batchId={batchId} /> : null}
       {tab === "assignments" ? <AssignmentManager batchId={batchId} /> : null}
       {tab === "materials" ? <BatchMaterialsManager batchId={batchId} /> : null}
+
+      {courseModalOpen && batch ? (
+        <BatchCourseModal
+          batch={batch}
+          onClose={() => setCourseModalOpen(false)}
+        />
+      ) : null}
     </div>
   );
 }

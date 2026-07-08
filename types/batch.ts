@@ -3,6 +3,8 @@ export interface Batch {
   id: string;
   subject_id: string;
   subject_name: string;
+  course_id: string | null;
+  course_title: string | null;
   name: string;
   description: string;
   teacher_id: string | null;

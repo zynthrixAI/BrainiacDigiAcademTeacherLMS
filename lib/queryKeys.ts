@@ -10,6 +10,9 @@ export const QUERY_KEYS = {
     all: ["batches"] as const,
     materials: (batchId: string) => ["batches", "materials", batchId] as const,
   },
+  courses: {
+    bySubject: (subjectId: string) => ["courses", "bySubject", subjectId] as const,
+  },
   recordings: {
     root: ["recordings"] as const,
     list: ["recordings", "list"] as const,
