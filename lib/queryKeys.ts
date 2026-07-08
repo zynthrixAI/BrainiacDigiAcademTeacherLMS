@@ -11,7 +11,7 @@ export const QUERY_KEYS = {
     materials: (batchId: string) => ["batches", "materials", batchId] as const,
   },
   courses: {
-    bySubject: (subjectId: string) => ["courses", "bySubject", subjectId] as const,
+    forBatch: (batchId: string) => ["courses", "forBatch", batchId] as const,
   },
   recordings: {
     root: ["recordings"] as const,
