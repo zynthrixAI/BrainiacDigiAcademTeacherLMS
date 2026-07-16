@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useQueries } from "@tanstack/react-query";
 import { useBatches } from "@/hooks/query/useBatches";
+import { useZoomStatus } from "@/hooks/query/useZoomStatus";
 import { useCookies } from "@/hooks/useCookies";
 import { useCreateLiveClass } from "@/hooks/mutations/useCreateLiveClass";
 import { useUpdateLiveClass } from "@/hooks/mutations/useUpdateLiveClass";
@@ -57,6 +58,8 @@ export function LiveClassesPage() {
   const cookies = useCookies();
   const { data: batches, isLoading: batchesLoading, isError: batchesError, error: batchesErr } =
     useBatches();
+  const { data: zoomStatus } = useZoomStatus();
+  const zoomConnected = zoomStatus?.connected ?? false;
 
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [batchFilter, setBatchFilter] = useState("all");
@@ -178,7 +181,7 @@ export function LiveClassesPage() {
         title: editing.title,
         scheduled_at: toDateTimeLocalValue(editing.scheduled_at),
         total_duration: String(editing.total_duration),
-        meeting_url: editing.meeting_url,
+        meeting_url: editing.meeting_url ?? "",
         host_url: editing.host_url ?? "",
         meeting_id: editing.meeting_id ?? "",
       }
@@ -311,6 +314,7 @@ export function LiveClassesPage() {
             submitLabel="Save changes"
             pending={formPending}
             errorMessage={formError}
+            zoomConnected={zoomConnected}
             onSubmit={submitForm}
           />
         ) : (
@@ -328,6 +332,7 @@ export function LiveClassesPage() {
               pending={formPending}
               errorMessage={formError}
               disabled={!createBatchId}
+              zoomConnected={zoomConnected}
               onSubmit={submitForm}
             />
           </div>

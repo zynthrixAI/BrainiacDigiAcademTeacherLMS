@@ -43,4 +43,7 @@ export const QUERY_KEYS = {
     list: (status?: QuestionStatus | "all") =>
       ["questions", "list", status ?? "all"] as const,
   },
+  zoom: {
+    status: ["zoom-status"] as const,
+  },
 } as const;

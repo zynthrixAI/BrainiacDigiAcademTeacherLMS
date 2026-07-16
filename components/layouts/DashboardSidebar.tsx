@@ -8,6 +8,7 @@ import { CalendarIcon } from "@/components/icons/CalendarIcon";
 import { PlayIcon } from "@/components/icons/PlayIcon";
 import { ClipboardIcon } from "@/components/icons/ClipboardIcon";
 import { QuestionIcon } from "@/components/icons/QuestionIcon";
+import { SettingsIcon } from "@/components/icons/SettingsIcon";
 import { LogoutIcon } from "@/components/icons/LogoutIcon";
 import { useTeacherLogout } from "@/hooks/mutations/useTeacherLogout";
 import { useTeacherProfile } from "@/hooks/query/useTeacherProfile";
@@ -30,6 +31,16 @@ function useNavSections(pendingQuestions?: number): NavSection[] {
           href: ROUTES.questions,
           icon: QuestionIcon,
           badge: pendingQuestions,
+        },
+      ],
+    },
+    {
+      section: "Account",
+      items: [
+        {
+          label: "Integrations",
+          href: ROUTES.settingsIntegrations,
+          icon: SettingsIcon,
         },
       ],
     },

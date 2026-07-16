@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useLiveClasses } from "@/hooks/query/useLiveClasses";
+import { useZoomStatus } from "@/hooks/query/useZoomStatus";
 import { useCreateLiveClass } from "@/hooks/mutations/useCreateLiveClass";
 import { useUpdateLiveClass } from "@/hooks/mutations/useUpdateLiveClass";
 import { useStartLiveClass } from "@/hooks/mutations/useStartLiveClass";
@@ -67,6 +68,8 @@ export function LiveClassManager({ batchId }: LiveClassManagerProps) {
   if (statusFilter !== "all") params.status = statusFilter;
 
   const { data, isLoading, isError, error } = useLiveClasses(batchId, params);
+  const { data: zoomStatus } = useZoomStatus();
+  const zoomConnected = zoomStatus?.connected ?? false;
 
   const createMutation = useCreateLiveClass(batchId);
   const updateMutation = useUpdateLiveClass();
@@ -146,7 +149,7 @@ export function LiveClassManager({ batchId }: LiveClassManagerProps) {
         title: editing.title,
         scheduled_at: toDateTimeLocalValue(editing.scheduled_at),
         total_duration: String(editing.total_duration),
-        meeting_url: editing.meeting_url,
+        meeting_url: editing.meeting_url ?? "",
         host_url: editing.host_url ?? "",
         meeting_id: editing.meeting_id ?? "",
       }
@@ -266,6 +269,7 @@ export function LiveClassManager({ batchId }: LiveClassManagerProps) {
           submitLabel={editing ? "Save changes" : "Schedule class"}
           pending={formPending}
           errorMessage={formError}
+          zoomConnected={zoomConnected}
           onSubmit={submitForm}
         />
       </Modal>

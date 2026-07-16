@@ -39,6 +39,21 @@ export function LiveClassRow({
 }: LiveClassRowProps) {
   const status = STATUS_STYLES[liveClass.status];
 
+  // A scheduled class without a link is waiting on (or failed) the automatic
+  // Zoom-meeting creation; a present URL means the link is ready.
+  const zoomBadge =
+    liveClass.status === "scheduled" && !liveClass.meeting_url
+      ? liveClass.zoom_creation_status === "failed"
+        ? {
+            label: "Auto-create failed — add link manually or reconnect Zoom",
+            className: "bg-[#fef2f2] text-red",
+          }
+        : {
+            label: "Zoom link pending",
+            className: "bg-[#eef2ff] text-blue",
+          }
+      : null;
+
   return (
     <div className="flex flex-col gap-3 border-b border-line px-1 py-4 last:border-b-0 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex min-w-0 flex-col gap-1">
@@ -65,6 +80,13 @@ export function LiveClassRow({
           <span>{formatDateTime(liveClass.scheduled_at)}</span>
           <span>·</span>
           <span>{liveClass.total_duration} min</span>
+          {zoomBadge ? (
+            <span
+              className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-bold ${zoomBadge.className}`}
+            >
+              {zoomBadge.label}
+            </span>
+          ) : null}
         </div>
       </div>
 

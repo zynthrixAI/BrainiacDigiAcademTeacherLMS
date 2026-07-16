@@ -29,6 +29,7 @@ export const ROUTES = {
   recordings: "/recordings",
   assignments: "/assignments",
   questions: "/questions",
+  settingsIntegrations: "/settings/integrations",
 } as const;
 
 export const AUTH_BRAND = {

@@ -5,6 +5,9 @@ export type LiveClassStatus =
   | "cancelled"
   | "past_due";
 
+/** Progress of the automatic Zoom-meeting creation for a live class. */
+export type ZoomCreationStatus = "pending" | "created" | "failed";
+
 /** LiveClassResponse from the teacher live-classes API. */
 export interface LiveClass {
   id: string;
@@ -14,9 +17,10 @@ export interface LiveClass {
   subject_name: string;
   title: string;
   total_duration: number;
-  meeting_url: string;
+  meeting_url: string | null;
   host_url: string | null;
   meeting_id: string | null;
+  zoom_creation_status: ZoomCreationStatus | null;
   teacher_name: string | null;
   scheduled_at: string;
   started_at: string | null;
@@ -31,7 +35,8 @@ export interface LiveClass {
 export interface LiveClassCreatePayload {
   title: string;
   total_duration: number;
-  meeting_url: string;
+  /** Omitted (not null) when empty and Zoom is connected — the backend then auto-creates the meeting. */
+  meeting_url?: string;
   host_url?: string;
   meeting_id?: string;
   scheduled_at: string;
