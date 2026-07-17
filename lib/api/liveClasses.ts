@@ -3,6 +3,10 @@ import { TEACHER_API_PREFIX } from "@/lib/constants";
 import type { PaginatedResponse } from "@/types/api";
 import type { AttendanceListResponse } from "@/types/attendance";
 import type {
+  ClassGeneratePayload,
+  ClassGenerateResponse,
+  ClassPreviewPayload,
+  ClassPreviewResponse,
   LiveClass,
   LiveClassCancelPayload,
   LiveClassCreatePayload,
@@ -31,6 +35,41 @@ export async function createLiveClass(
 ): Promise<LiveClass> {
   const { data } = await axiosInstance.post<LiveClass>(
     `${BASE}/batches/${batchId}/live-classes/`,
+    payload,
+    authHeader(accessToken),
+  );
+  return data;
+}
+
+/**
+ * Dry-run a recurrence into concrete slots, flagging conflicts. Writes nothing —
+ * used to show the teacher exactly which dates a series will produce before
+ * anything is created.
+ */
+export async function previewClasses(
+  accessToken: string,
+  batchId: string,
+  payload: ClassPreviewPayload,
+): Promise<ClassPreviewResponse> {
+  const { data } = await axiosInstance.post<ClassPreviewResponse>(
+    `${BASE}/batches/${batchId}/classes/preview`,
+    payload,
+    authHeader(accessToken),
+  );
+  return data;
+}
+
+/**
+ * Create the teacher's confirmed list of classes in one shot. All-or-nothing
+ * and idempotent server-side; the backend re-validates every slot.
+ */
+export async function generateClasses(
+  accessToken: string,
+  batchId: string,
+  payload: ClassGeneratePayload,
+): Promise<ClassGenerateResponse> {
+  const { data } = await axiosInstance.post<ClassGenerateResponse>(
+    `${BASE}/batches/${batchId}/classes/generate`,
     payload,
     authHeader(accessToken),
   );

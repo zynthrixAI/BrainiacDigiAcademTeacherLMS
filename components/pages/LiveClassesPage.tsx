@@ -13,6 +13,7 @@ import { useCancelLiveClass } from "@/hooks/mutations/useCancelLiveClass";
 import { useDeleteLiveClass } from "@/hooks/mutations/useDeleteLiveClass";
 import { LiveClassRow } from "@/components/widgets/LiveClassRow";
 import { AttendanceModal } from "@/components/widgets/AttendanceModal";
+import { RecurringScheduler } from "@/components/widgets/RecurringScheduler";
 import { LiveClassForm } from "@/components/forms/LiveClassForm";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
@@ -64,6 +65,7 @@ export function LiveClassesPage() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [batchFilter, setBatchFilter] = useState("all");
   const [formOpen, setFormOpen] = useState(false);
+  const [seriesOpen, setSeriesOpen] = useState(false);
   const [editing, setEditing] = useState<LiveClass | null>(null);
   const [createBatchId, setCreateBatchId] = useState("");
   const [cancelTarget, setCancelTarget] = useState<LiveClass | null>(null);
@@ -211,17 +213,26 @@ export function LiveClassesPage() {
             Every live class across your batches.
           </span>
         </div>
-        <Button
-          disabled={!hasBatches}
-          onClick={() => {
-            setEditing(null);
-            setCreateBatchId(batchFilter !== "all" ? batchFilter : "");
-            createMutation.reset();
-            setFormOpen(true);
-          }}
-        >
-          <PlusIcon size={14} /> Schedule class
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="ghost"
+            disabled={!hasBatches}
+            onClick={() => setSeriesOpen(true)}
+          >
+            Schedule series
+          </Button>
+          <Button
+            disabled={!hasBatches}
+            onClick={() => {
+              setEditing(null);
+              setCreateBatchId(batchFilter !== "all" ? batchFilter : "");
+              createMutation.reset();
+              setFormOpen(true);
+            }}
+          >
+            <PlusIcon size={14} /> Schedule class
+          </Button>
+        </div>
       </div>
 
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -381,6 +392,14 @@ export function LiveClassesPage() {
       <AttendanceModal
         liveClassId={attendanceId}
         onClose={() => setAttendanceId(null)}
+      />
+
+      <RecurringScheduler
+        open={seriesOpen}
+        onClose={() => setSeriesOpen(false)}
+        zoomConnected={zoomConnected}
+        fixedBatchId={batchFilter !== "all" ? batchFilter : undefined}
+        batchOptions={batchOptions}
       />
     </div>
   );

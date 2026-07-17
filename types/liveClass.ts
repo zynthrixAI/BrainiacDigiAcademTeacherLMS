@@ -63,3 +63,51 @@ export interface LiveClassFormValues {
   host_url: string;
   meeting_id: string;
 }
+
+// ── Recurring scheduling: preview → generate ──────────────────────────────────
+
+export type RecurrenceFrequency = "weekly" | "biweekly";
+
+/**
+ * A recurring live-class schedule. `days_of_week` uses Python's convention —
+ * 0 = Monday … 6 = Sunday — to match the backend (Recurrence model) exactly.
+ */
+export interface Recurrence {
+  frequency: RecurrenceFrequency;
+  days_of_week: number[];
+  start_time: string; // "HH:MM", 24h, local wall-clock in `timezone`
+  timezone: string; // IANA name, e.g. "Asia/Karachi"
+  total_duration: number; // minutes
+  end_date?: string | null; // ISO datetime; omit for open-ended
+}
+
+export interface ClassPreviewPayload {
+  start_date: string; // "YYYY-MM-DD", local date in the recurrence timezone
+  recurrence: Recurrence;
+  max_occurrences?: number;
+}
+
+export interface PreviewSlot {
+  scheduled_at: string; // ISO UTC
+  conflicts_with: string | null; // title of the colliding class, else null
+}
+
+export interface ClassPreviewResponse {
+  slots: PreviewSlot[];
+  total: number;
+  conflicts: number;
+}
+
+export interface ClassGeneratePayload {
+  title: string;
+  total_duration: number;
+  scheduled_ats: string[]; // ISO — the teacher's confirmed list
+  meeting_url?: string;
+  host_url?: string;
+  meeting_id?: string;
+}
+
+export interface ClassGenerateResponse {
+  created: LiveClass[];
+  total_created: number;
+}

@@ -11,6 +11,7 @@ import { useCancelLiveClass } from "@/hooks/mutations/useCancelLiveClass";
 import { useDeleteLiveClass } from "@/hooks/mutations/useDeleteLiveClass";
 import { LiveClassRow } from "@/components/widgets/LiveClassRow";
 import { AttendanceModal } from "@/components/widgets/AttendanceModal";
+import { RecurringScheduler } from "@/components/widgets/RecurringScheduler";
 import { LiveClassForm } from "@/components/forms/LiveClassForm";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
@@ -58,6 +59,7 @@ export function LiveClassManager({ batchId }: LiveClassManagerProps) {
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [formOpen, setFormOpen] = useState(false);
+  const [seriesOpen, setSeriesOpen] = useState(false);
   const [editing, setEditing] = useState<LiveClass | null>(null);
   const [cancelTarget, setCancelTarget] = useState<LiveClass | null>(null);
   const [cancelReason, setCancelReason] = useState("");
@@ -182,14 +184,19 @@ export function LiveClassManager({ batchId }: LiveClassManagerProps) {
             }}
           />
         </div>
-        <Button
-          onClick={() => {
-            setEditing(null);
-            setFormOpen(true);
-          }}
-        >
-          <PlusIcon size={14} /> Schedule class
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="ghost" onClick={() => setSeriesOpen(true)}>
+            Schedule series
+          </Button>
+          <Button
+            onClick={() => {
+              setEditing(null);
+              setFormOpen(true);
+            }}
+          >
+            <PlusIcon size={14} /> Schedule class
+          </Button>
+        </div>
       </div>
 
       <div className="rounded-[14px] border border-line bg-bg-elev p-5 shadow-[0_1px_2px_rgba(28,27,27,0.03)]">
@@ -316,6 +323,13 @@ export function LiveClassManager({ batchId }: LiveClassManagerProps) {
       <AttendanceModal
         liveClassId={attendanceId}
         onClose={() => setAttendanceId(null)}
+      />
+
+      <RecurringScheduler
+        open={seriesOpen}
+        onClose={() => setSeriesOpen(false)}
+        zoomConnected={zoomConnected}
+        fixedBatchId={batchId}
       />
     </div>
   );
