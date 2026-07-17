@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQueries } from "@tanstack/react-query";
 import { useBatches } from "@/hooks/query/useBatches";
 import { useZoomStatus } from "@/hooks/query/useZoomStatus";
@@ -21,6 +21,7 @@ import { FormError } from "@/components/ui/FormError";
 import { SegmentedTabs } from "@/components/ui/SegmentedTabs";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { PlusIcon } from "@/components/icons/PlusIcon";
+import { ArrowRightIcon } from "@/components/icons/ArrowRightIcon";
 import { listLiveClasses } from "@/lib/api/liveClasses";
 import { withAuthToken } from "@/lib/utils/withAuthToken";
 import { extractApiError } from "@/lib/utils/apiError";
@@ -76,7 +77,7 @@ export function LiveClassesPage() {
   const params: LiveClassListParams = { page: 1, limit: PER_BATCH_LIMIT };
   if (statusFilter !== "all") params.status = statusFilter;
 
-  const batchList = batches ?? [];
+  const batchList = useMemo(() => batches ?? [], [batches]);
 
   const results = useQueries({
     queries: batchList.map((batch) => ({
@@ -110,6 +111,43 @@ export function LiveClassesPage() {
 
   const classesLoading = results.some((result) => result.isLoading);
   const firstError = results.find((result) => result.isError)?.error;
+
+  // Group the flat cross-batch list into one collapsible section per batch, in
+  // the teacher's batch order. A single long list of every class is hard to
+  // scan; sections keep each batch's schedule together.
+  const groups = useMemo(() => {
+    const byBatch = new Map<string, LiveClass[]>();
+    for (const liveClass of items) {
+      const bucket = byBatch.get(liveClass.batch_id) ?? [];
+      bucket.push(liveClass);
+      byBatch.set(liveClass.batch_id, bucket);
+    }
+    return batchList
+      .filter((batch) => byBatch.has(batch.id))
+      .map((batch) => ({
+        batchId: batch.id,
+        batchName: batch.name,
+        subjectName: batch.subject_name,
+        classes: byBatch.get(batch.id) ?? [],
+      }));
+  }, [items, batchList]);
+
+  // Which sections are expanded. `null` = the default: expand everything when
+  // there's just one section, otherwise start collapsed for a clean overview.
+  const [openBatches, setOpenBatches] = useState<Set<string> | null>(null);
+  const singleGroup = groups.length === 1;
+  const isBatchOpen = (batchId: string) =>
+    openBatches === null ? singleGroup : openBatches.has(batchId);
+  const toggleBatch = (batchId: string) => {
+    setOpenBatches((prev) => {
+      const base =
+        prev ?? new Set(singleGroup ? groups.map((group) => group.batchId) : []);
+      const next = new Set(base);
+      if (next.has(batchId)) next.delete(batchId);
+      else next.add(batchId);
+      return next;
+    });
+  };
 
   const batchOptions = batchList.map((batch) => ({
     value: batch.id,
@@ -277,40 +315,72 @@ export function LiveClassesPage() {
             No live classes{statusFilter !== "all" ? " with this status" : ""} yet.
           </p>
         ) : (
-          <>
-            <div className="flex flex-col">
-              {deleteMutation.isError ? (
-                <div className="pb-3">
-                  <FormError message={extractApiError(deleteMutation.error)} />
+          <div className="flex flex-col gap-3">
+            {deleteMutation.isError ? (
+              <FormError message={extractApiError(deleteMutation.error)} />
+            ) : null}
+            {groups.map((group) => {
+              const open = isBatchOpen(group.batchId);
+              return (
+                <div
+                  key={group.batchId}
+                  className="overflow-hidden rounded-[12px] border border-line"
+                >
+                  <button
+                    type="button"
+                    onClick={() => toggleBatch(group.batchId)}
+                    aria-expanded={open}
+                    className="flex w-full items-center gap-3 bg-[#fafaf9] px-4 py-3 text-left transition-colors hover:bg-[#f4f4f5]"
+                  >
+                    <ArrowRightIcon
+                      size={14}
+                      className={`shrink-0 text-muted transition-transform ${
+                        open ? "rotate-90" : ""
+                      }`}
+                    />
+                    <div className="flex min-w-0 flex-1 flex-col">
+                      <span className="truncate font-display text-sm font-bold text-ink">
+                        {group.batchName}
+                      </span>
+                      <span className="truncate text-xs text-muted">
+                        {group.subjectName}
+                      </span>
+                    </div>
+                    <span className="shrink-0 rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-muted">
+                      {group.classes.length}{" "}
+                      {group.classes.length === 1 ? "class" : "classes"}
+                    </span>
+                  </button>
+                  {open ? (
+                    <div className="flex flex-col border-t border-line px-4">
+                      {group.classes.map((liveClass) => (
+                        <LiveClassRow
+                          key={liveClass.id}
+                          liveClass={liveClass}
+                          pending={busyId === liveClass.id}
+                          onStart={handleStart}
+                          onEnd={handleEnd}
+                          onEdit={(target) => {
+                            setEditing(target);
+                            setFormOpen(true);
+                          }}
+                          onCancel={(target) => {
+                            setCancelTarget(target);
+                            setCancelReason("");
+                            cancelMutation.reset();
+                          }}
+                          onDelete={handleDelete}
+                          onViewAttendance={(target) =>
+                            setAttendanceId(target.id)
+                          }
+                        />
+                      ))}
+                    </div>
+                  ) : null}
                 </div>
-              ) : null}
-              {items.map((liveClass) => (
-                <LiveClassRow
-                  key={liveClass.id}
-                  liveClass={liveClass}
-                  showBatch
-                  pending={busyId === liveClass.id}
-                  onStart={handleStart}
-                  onEnd={handleEnd}
-                  onEdit={(target) => {
-                    setEditing(target);
-                    setFormOpen(true);
-                  }}
-                  onCancel={(target) => {
-                    setCancelTarget(target);
-                    setCancelReason("");
-                    cancelMutation.reset();
-                  }}
-                  onDelete={handleDelete}
-                  onViewAttendance={(target) => setAttendanceId(target.id)}
-                />
-              ))}
-            </div>
-            <div className="mt-4 border-t border-line pt-3 text-xs text-muted">
-              Showing {items.length} live{" "}
-              {items.length === 1 ? "class" : "classes"}
-            </div>
-          </>
+              );
+            })}
+          </div>
         )}
       </div>
 
