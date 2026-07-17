@@ -18,19 +18,36 @@ import type { ZoomConnectPayload } from "@/types/zoom";
  */
 const TUTORIAL_URL = "/docs/zoom-setup";
 
-/** Friendly messages for the backend's POST /zoom error detail codes. */
+/**
+ * Fallback messages for the backend's POST /zoom error codes. The backend now
+ * also returns an actionable `hint` per failure (which points at the RIGHT
+ * fields — e.g. an invalid_client rejection is about the Client ID/Secret, not
+ * the Account ID); prefer that when present.
+ */
 const CONNECT_ERROR_MESSAGES: Record<string, string> = {
   invalid_credentials:
-    "Zoom rejected these credentials — re-check Account ID, Client ID and Client Secret",
+    "Zoom rejected your Client ID or Client Secret — re-copy both and make sure the app is Activated",
   email_not_in_account:
     "This email doesn't belong to the Zoom account those credentials are for",
   zoom_rate_limited: "Zoom is rate-limiting requests — try again in a minute",
+  zoom_api_error: "Zoom returned an unexpected error — please try again",
 };
+
+type ConnectErrorDetail = { code?: string; hint?: string; zoom_reason?: string };
 
 function connectErrorMessage(error: unknown): string {
   if (isAxiosError(error)) {
     const detail = (error.response?.data as { detail?: unknown } | undefined)
       ?.detail;
+    // New contract: a structured detail with an actionable hint.
+    if (detail && typeof detail === "object") {
+      const { code, hint } = detail as ConnectErrorDetail;
+      if (typeof hint === "string" && hint) return hint;
+      if (typeof code === "string" && code in CONNECT_ERROR_MESSAGES) {
+        return CONNECT_ERROR_MESSAGES[code];
+      }
+    }
+    // Back-compat: a plain string detail code.
     if (typeof detail === "string" && detail in CONNECT_ERROR_MESSAGES) {
       return CONNECT_ERROR_MESSAGES[detail];
     }
