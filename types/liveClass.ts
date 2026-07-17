@@ -28,6 +28,8 @@ export interface LiveClass {
   status: LiveClassStatus;
   cancelled_at: string | null;
   cancel_reason: string | null;
+  /** Shared by every class created together via "Schedule a series". */
+  series_id: string | null;
   created_at: string;
   updated_at: string;
 }

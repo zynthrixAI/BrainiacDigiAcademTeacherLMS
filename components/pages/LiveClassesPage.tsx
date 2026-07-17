@@ -124,16 +124,50 @@ export function LiveClassesPage() {
     }
     return batchList
       .filter((batch) => byBatch.has(batch.id))
-      .map((batch) => ({
-        batchId: batch.id,
-        batchName: batch.name,
-        subjectName: batch.subject_name,
-        classes: byBatch.get(batch.id) ?? [],
-      }));
+      .map((batch) => {
+        const classes = byBatch.get(batch.id) ?? [];
+        // Within a batch, gather each recurring series (shared series_id) under
+        // its own header; classes scheduled one at a time stay loose.
+        const bySeries = new Map<string, LiveClass[]>();
+        const loose: LiveClass[] = [];
+        for (const liveClass of classes) {
+          if (liveClass.series_id) {
+            const bucket = bySeries.get(liveClass.series_id) ?? [];
+            bucket.push(liveClass);
+            bySeries.set(liveClass.series_id, bucket);
+          } else {
+            loose.push(liveClass);
+          }
+        }
+        const seriesGroups = Array.from(bySeries.entries()).map(
+          ([seriesId, seriesClasses]) => {
+            const dates = seriesClasses.map((c) => c.scheduled_at);
+            return {
+              seriesId,
+              title: seriesClasses[0].title,
+              count: seriesClasses.length,
+              // ISO-8601 UTC strings sort chronologically as plain strings.
+              startIso: dates.reduce((min, d) => (d < min ? d : min)),
+              endIso: dates.reduce((max, d) => (d > max ? d : max)),
+              classes: seriesClasses,
+            };
+          },
+        );
+        // Newest series first, matching the overall descending order.
+        seriesGroups.sort((a, b) => (a.endIso < b.endIso ? 1 : -1));
+        return {
+          batchId: batch.id,
+          batchName: batch.name,
+          subjectName: batch.subject_name,
+          count: classes.length,
+          seriesGroups,
+          loose,
+        };
+      });
   }, [items, batchList]);
 
-  // Which sections are expanded. `null` = the default: expand everything when
-  // there's just one section, otherwise start collapsed for a clean overview.
+  // Which batch sections are expanded. `null` = the default: expand everything
+  // when there's just one batch, otherwise start collapsed for a clean overview.
   const [openBatches, setOpenBatches] = useState<Set<string> | null>(null);
   const singleGroup = groups.length === 1;
   const isBatchOpen = (batchId: string) =>
@@ -148,6 +182,24 @@ export function LiveClassesPage() {
       return next;
     });
   };
+
+  // Series start collapsed so a whole term folds into one line.
+  const [openSeries, setOpenSeries] = useState<Set<string>>(new Set());
+  const isSeriesOpen = (seriesId: string) => openSeries.has(seriesId);
+  const toggleSeries = (seriesId: string) => {
+    setOpenSeries((prev) => {
+      const next = new Set(prev);
+      if (next.has(seriesId)) next.delete(seriesId);
+      else next.add(seriesId);
+      return next;
+    });
+  };
+
+  const formatDateShort = (iso: string) =>
+    new Date(iso).toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+    });
 
   const batchOptions = batchList.map((batch) => ({
     value: batch.id,
@@ -239,6 +291,27 @@ export function LiveClassesPage() {
       : undefined;
 
   const hasBatches = batchList.length > 0;
+
+  const renderRow = (liveClass: LiveClass) => (
+    <LiveClassRow
+      key={liveClass.id}
+      liveClass={liveClass}
+      pending={busyId === liveClass.id}
+      onStart={handleStart}
+      onEnd={handleEnd}
+      onEdit={(target) => {
+        setEditing(target);
+        setFormOpen(true);
+      }}
+      onCancel={(target) => {
+        setCancelTarget(target);
+        setCancelReason("");
+        cancelMutation.reset();
+      }}
+      onDelete={handleDelete}
+      onViewAttendance={(target) => setAttendanceId(target.id)}
+    />
+  );
 
   return (
     <div className="mx-auto w-full max-w-[1100px]">
@@ -347,34 +420,53 @@ export function LiveClassesPage() {
                       </span>
                     </div>
                     <span className="shrink-0 rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-muted">
-                      {group.classes.length}{" "}
-                      {group.classes.length === 1 ? "class" : "classes"}
+                      {group.count} {group.count === 1 ? "class" : "classes"}
                     </span>
                   </button>
                   {open ? (
-                    <div className="flex flex-col border-t border-line px-4">
-                      {group.classes.map((liveClass) => (
-                        <LiveClassRow
-                          key={liveClass.id}
-                          liveClass={liveClass}
-                          pending={busyId === liveClass.id}
-                          onStart={handleStart}
-                          onEnd={handleEnd}
-                          onEdit={(target) => {
-                            setEditing(target);
-                            setFormOpen(true);
-                          }}
-                          onCancel={(target) => {
-                            setCancelTarget(target);
-                            setCancelReason("");
-                            cancelMutation.reset();
-                          }}
-                          onDelete={handleDelete}
-                          onViewAttendance={(target) =>
-                            setAttendanceId(target.id)
-                          }
-                        />
-                      ))}
+                    <div className="flex flex-col border-t border-line px-4 py-1">
+                      {group.seriesGroups.map((series) => {
+                        const seriesOpen = isSeriesOpen(series.seriesId);
+                        const range =
+                          series.startIso === series.endIso
+                            ? formatDateShort(series.startIso)
+                            : `${formatDateShort(series.startIso)} – ${formatDateShort(series.endIso)}`;
+                        return (
+                          <div
+                            key={series.seriesId}
+                            className="my-1 overflow-hidden rounded-[10px] border border-line"
+                          >
+                            <button
+                              type="button"
+                              onClick={() => toggleSeries(series.seriesId)}
+                              aria-expanded={seriesOpen}
+                              className="flex w-full items-center gap-2.5 px-3 py-2.5 text-left transition-colors hover:bg-[#fafaf9]"
+                            >
+                              <ArrowRightIcon
+                                size={13}
+                                className={`shrink-0 text-muted transition-transform ${
+                                  seriesOpen ? "rotate-90" : ""
+                                }`}
+                              />
+                              <span className="shrink-0 rounded-full bg-[#eef2ff] px-2 py-0.5 text-[11px] font-bold text-blue">
+                                Series
+                              </span>
+                              <span className="min-w-0 flex-1 truncate text-sm font-semibold text-ink">
+                                {series.title}
+                              </span>
+                              <span className="shrink-0 text-xs text-muted">
+                                {series.count} · {range}
+                              </span>
+                            </button>
+                            {seriesOpen ? (
+                              <div className="flex flex-col border-t border-line px-3">
+                                {series.classes.map(renderRow)}
+                              </div>
+                            ) : null}
+                          </div>
+                        );
+                      })}
+                      {group.loose.map(renderRow)}
                     </div>
                   ) : null}
                 </div>
